@@ -53,11 +53,11 @@ ADelusionCharacter::ADelusionCharacter()
     // A small original mannequin made from engine primitives needs no asset pack.
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Sphere(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-    auto AddBodyPart = [this](const TCHAR* Name, UStaticMesh* Mesh, FVector Position, FVector Scale)
+    auto AddBodyPart = [this](const TCHAR* Name, UStaticMesh* BodyMesh, FVector Position, FVector Scale)
     {
         UStaticMeshComponent* Part = CreateDefaultSubobject<UStaticMeshComponent>(Name);
         Part->SetupAttachment(RootComponent);
-        Part->SetStaticMesh(Mesh);
+        Part->SetStaticMesh(BodyMesh);
         Part->SetRelativeLocation(Position);
         Part->SetRelativeScale3D(Scale);
         Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);

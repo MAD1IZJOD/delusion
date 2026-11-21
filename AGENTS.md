@@ -145,6 +145,29 @@ After pushing, verify that the remote received that exact commit and that the lo
 
 `AGENTS.md` must be the first repository file added, committed, and pushed before any other project file. Keep these Git rules and core engineering principles here so future sessions can follow them. Every subsequent session must read this file before changing code.
 
+## Permanent storage policy
+
+- Use D: as the primary drive for all DELUSION development. Keep the project at `D:\personal projects\delusion` and Unreal Engine at `D:\Epic Games\UE_5.8`.
+- Prefer D: for downloads and installer packages, project assets, build and packaging outputs, shader and Derived Data Cache data, intermediate compilation data, temporary build files, debugging logs, and profiling output. Prefer D: for new large development tools when the official installer supports a custom location; do not relocate existing installations unnecessarily.
+- Keep project artifacts inside the permanent root and outside version control. Existing ignored destinations include `DerivedDataCache`, `Intermediate`, `Saved`, `Temp`, `Downloads`, and `Artifacts`. Use `Artifacts\Windows` for packaged Windows builds, `Saved\Logs` for logs, and `Saved\Temp` for temporary project build files.
+- Keep external development-software installers on D:, such as `D:\Epic Games\Installers`, outside the Git repository.
+- Inspect actual cache and temporary-directory settings before changing them. Prefer documented project-specific configuration and reversible process-scoped overrides over global Windows environment changes. When relevant, inspect `UE-LocalDataCachePath`, `TEMP`, `TMP`, `DOTNET_CLI_HOME`, and `uebp_LogFolder` for each engine or build invocation; direct supported outputs to the ignored project locations on D:.
+- The successful engine verification launch used a process-local `UE-LocalDataCachePath=D:\personal projects\delusion\DerivedDataCache`, with editor user data and logs under `Saved\EnvironmentVerification`. These process-local settings do not persist automatically into a fresh shell. Do not assume they do.
+- Do not change machine-wide or user-wide Windows environment settings merely for convenience. Do not create symbolic links, alter disk partitions, or relocate Windows system directories.
+- Inspect C: disk consumption if needed. Remove only known-safe, nonessential temporary files after confirming they are not in use. Never automatically delete personal documents, downloads, repositories, Windows system files, application installations, user profiles, or unknown folders.
+- Do not empty the Recycle Bin or clear unrelated browser, application, or account data without approval. Ask before ambiguous or destructive cleanup.
+- Report actual free space before and after significant installation or cleanup operations. Preserve existing compilers, SDKs, and development tools. Do not bypass UAC or other security prompts.
+
+## Verified environment checkpoint and compiler requirement
+
+- Unreal Engine 5.8.4 is installed at `D:\Epic Games\UE_5.8`. Do not download or reinstall it. Repeat already completed engine checks only when a relevant condition changes.
+- UnrealBuildTool and AutomationTool have executed successfully. UBT platform validation reported `Win64 VALID` for the installed Windows SDK. These checks are not proof of C++ compilation or packaging.
+- The editor initialized with DirectX 11 and the supported runtime argument `-DisablePlugins=Fab`. Windows Application Control blocked the optional Fab DLL with error 4551 during the default launch. Keep Windows security settings intact; do not patch engine code or signed files to work around restrictions.
+- Install and verify MSVC 14.50 before game implementation. The official Visual Studio component is `Microsoft.VisualStudio.Component.VC.14.50.18.0.x86.x64`; use the existing Visual Studio Installer if it is available in that installation. Preserve MSVC 14.51 and the existing Windows SDK.
+- The installed engine's `Engine\Config\Windows\Windows_SDK.json` prefers 14.50 or 14.44 and rejects 14.50 versions below 14.50.35723. Do not assume 14.51 compatibility. Verify the actual compiler executables and UBT selection rather than treating an existing version directory as a working installation.
+- On 2026-11-21, Visual Studio Installer showed an 18.12.1 setup paused. MSVC 14.50 was absent, and no `cl.exe` or `link.exe` was found under the registered MSVC toolset root. Finish safe toolchain setup and verify the compiler before changing game source.
+- Sprint 0 also includes pause and normal exit functionality. Its acceptance target remains a genuinely playable packaged Windows executable.
+
 ## Toolchain audit and current engine gate
 
 After the mandatory Git checks, inspect the actual Windows environment using commands, installed files, and tool outputs:

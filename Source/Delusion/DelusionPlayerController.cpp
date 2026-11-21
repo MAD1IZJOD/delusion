@@ -66,10 +66,10 @@ void ADelusionPlayerController::TogglePause()
     FlushPressedKeys();
     SetIgnoreMoveInput(bPauseNow);
     SetIgnoreLookInput(bPauseNow);
-    if (ADelusionCharacter* Character = Cast<ADelusionCharacter>(GetPawn()))
+    if (ADelusionCharacter* ControlledCharacter = Cast<ADelusionCharacter>(GetPawn()))
     {
-        Character->SetSprinting(false);
-        Character->StopJumping();
+        ControlledCharacter->SetSprinting(false);
+        ControlledCharacter->StopJumping();
     }
     bShowMouseCursor = bPauseNow;
     if (HUDWidget) { HUDWidget->SetPauseMenuVisible(bPauseNow); }

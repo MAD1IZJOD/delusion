@@ -28,6 +28,10 @@
     {
       "Name": "Fab",
       "Enabled": false
+    },
+    {
+      "Name": "AndroidFileServer",
+      "Enabled": false
     }
   ]
 }

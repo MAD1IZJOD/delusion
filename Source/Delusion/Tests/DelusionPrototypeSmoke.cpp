@@ -158,6 +158,7 @@ private:
         Add(1.0, [this] { Key(EKeys::W, IE_Pressed); }, [this]
         {
             WalkDistance = FVector::Dist2D(Origin, Pawn->GetActorLocation());
+            Test->AddInfo(FString::Printf(TEXT("Walk distance over one game second: %.1f cm"), WalkDistance));
             Test->TestTrue(TEXT("W moves the character forward"), WalkDistance > 200 && WalkDistance < 600);
             Key(EKeys::W, IE_Released, 0);
             Place(FVector(1200, -250, 105));
@@ -165,7 +166,9 @@ private:
         Add(0.3, [] {}, [this] { Origin = Pawn->GetActorLocation(); });
         Add(1.0, [this] { Key(EKeys::LeftShift, IE_Pressed); Key(EKeys::W, IE_Pressed); }, [this]
         {
-            Test->TestTrue(TEXT("Shift makes movement faster"), FVector::Dist2D(Origin, Pawn->GetActorLocation()) > WalkDistance * 1.35);
+            const double SprintDistance = FVector::Dist2D(Origin, Pawn->GetActorLocation());
+            Test->AddInfo(FString::Printf(TEXT("Sprint distance over one game second: %.1f cm"), SprintDistance));
+            Test->TestTrue(TEXT("Shift makes movement faster"), SprintDistance > WalkDistance * 1.35);
             Key(EKeys::W, IE_Released, 0); Key(EKeys::LeftShift, IE_Released, 0);
             Place(FVector(1200, -250, 105));
         });
@@ -179,7 +182,9 @@ private:
         Add(0.2, [this] { Player->SetControlRotation(FRotator(-10, 0, 0)); Key(EKeys::MouseX, IE_Axis, 80); Key(EKeys::MouseY, IE_Axis, 10000); }, [this]
         {
             const FRotator Rotation = Player->GetControlRotation().GetNormalized();
-            Test->TestTrue(TEXT("Mouse changes camera yaw and pitch"), FMath::Abs(Rotation.Yaw) > 1 && FMath::Abs(Rotation.Pitch + 10) > 1);
+            Test->AddInfo(FString::Printf(TEXT("Mouse input result: yaw=%.3f pitch=%.3f"), Rotation.Yaw, Rotation.Pitch));
+            Test->TestTrue(TEXT("Mouse changes camera yaw"), FMath::Abs(Rotation.Yaw) > 1);
+            Test->TestTrue(TEXT("Mouse changes camera pitch"), FMath::Abs(Rotation.Pitch + 10) > 1);
             Test->TestTrue(TEXT("Camera pitch remains constrained"), Rotation.Pitch >= -60.1 && Rotation.Pitch <= 35.1);
             Place(FVector(-1400, -2300, 105), 180);
         });

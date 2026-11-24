@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Editor', 'Game', 'ProjectFiles')]
+    [ValidateSet('Editor', 'Game', 'ProjectFiles', 'Package')]
     [string]$Target = 'Editor'
 )
 
@@ -44,21 +44,43 @@ try {
         [Environment]::SetEnvironmentVariable($name, $buildEnvironment[$name], 'Process')
     }
     [IO.Directory]::CreateDirectory("$projectRoot\Saved\Logs") | Out-Null
-    $buildArguments = @($buildTool)
-    if ($Target -eq 'ProjectFiles') {
-        $buildArguments += @('-ProjectFiles', "-Project=$projectRoot\Delusion.uproject", '-Game')
-    } else {
-        $targetName = if ($Target -eq 'Editor') { 'DelusionEditor' } else { 'Delusion' }
-        $buildArguments += @(
-            $targetName, 'Win64', 'Development', "-Project=$projectRoot\Delusion.uproject",
-            '-CompilerVersion=14.50.35740', '-MaxParallelActions=1', '-NoUBA', '-NoXGE',
-            '-NoHotReloadFromIDE'
+    if ($Target -eq 'Package') {
+        if (-not (Test-Path -LiteralPath "$projectRoot\Content\Maps\Prototype.umap")) {
+            throw 'The prototype map must exist before packaging.'
+        }
+        # Compile both targets explicitly with the pinned compiler before cooking.
+        & $PSCommandPath -Target Editor
+        & $PSCommandPath -Target Game
+        $automationTool = Join-Path $engineRoot 'Engine\Build\BatchFiles\RunUAT.bat'
+        $packageArguments = @(
+            '-NoCompile', '-NoCompileUAT', 'BuildCookRun', "-project=$projectRoot\Delusion.uproject",
+            '-noP4', '-platform=Win64', '-clientconfig=Development', '-skipbuild', '-skipbuildeditor',
+            '-cook', '-stage', '-pak', '-iostore', '-package', '-archive',
+            "-archivedirectory=$projectRoot\Artifacts\Windows", '-map=/Game/Maps/Prototype',
+            '-AdditionalCookerOptions=-CookProcessCount=1', '-unattended', '-utf8output'
         )
-    }
-    $buildArguments += "-Log=$projectRoot\Saved\Logs\Build-$Target.log"
-    & $dotnet @buildArguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "UnrealBuildTool failed with exit code $LASTEXITCODE. See Saved\Logs\Build-$Target.log."
+        & $automationTool @packageArguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "Windows packaging failed with exit code $LASTEXITCODE. See Saved\Logs\AutomationTool."
+        }
+        Write-Host "Windows package archived under $projectRoot\Artifacts\Windows."
+    } else {
+        $buildArguments = @($buildTool)
+        if ($Target -eq 'ProjectFiles') {
+            $buildArguments += @('-ProjectFiles', "-Project=$projectRoot\Delusion.uproject", '-Game')
+        } else {
+            $targetName = if ($Target -eq 'Editor') { 'DelusionEditor' } else { 'Delusion' }
+            $buildArguments += @(
+                $targetName, 'Win64', 'Development', "-Project=$projectRoot\Delusion.uproject",
+                '-CompilerVersion=14.50.35740', '-MaxParallelActions=1', '-NoUBA', '-NoXGE',
+                '-NoHotReloadFromIDE'
+            )
+        }
+        $buildArguments += "-Log=$projectRoot\Saved\Logs\Build-$Target.log"
+        & $dotnet @buildArguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "UnrealBuildTool failed with exit code $LASTEXITCODE. See Saved\Logs\Build-$Target.log."
+        }
     }
 } finally {
     foreach ($name in $previousEnvironment.Keys) {

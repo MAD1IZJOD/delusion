@@ -1,88 +1,83 @@
 # DELUSION
 
-An original single-player, third-person, open-world PC game built with Unreal Engine 5.8 stable, C++, and Blueprints. Sprint 0 targets a small, playable greybox prototype and a packaged Windows executable.
+An original single-player, third-person Unreal Engine 5.8 C++ game. Sprint 0 now has a locally verified, playable Windows greybox prototype: a controllable character, compact neighborhood, interaction terminal, HUD, and pause menu.
 
-## Current status
+The packaged Development build, source gameplay test and packaged gameplay test passed on 2026-11-25. The full Unreal Editor opened the map successfully. See [SPRINT0_REPORT.md](SPRINT0_REPORT.md) for evidence, individual implementation commits, storage measurements and test limitations.
 
-Repository foundation only, audited on 2026-11-20. No Unreal project descriptor, gameplay implementation, map, or executable has been created. Sprint 0 is not complete.
+## Play
 
-- Permanent project root: `D:\personal projects\delusion`.
-- Planned project descriptor: `D:\personal projects\delusion\Delusion.uproject`.
-- Remote: `origin`, `https://github.com/MAD1IZJOD/delusion`.
-- Branch: `main`.
-- Read [AGENTS.md](AGENTS.md) before changing code. It contains the mandatory Git workflow and engineering instructions.
-
-Each version-controlled file must be reviewed, verified, committed on its own, and pushed to `origin main` before another file is changed. Use the user's local Git CLI and the exact required author and committer identity. Do not batch files or rewrite history.
-
-## Verified repository setup
-
-- `.gitignore` excludes Unreal project/plugin caches, generated IDE data, local credentials, and designated build and package destinations. Source, maps, assets, source art, third-party licenses, and source packaging icons remain visible to Git.
-- `.gitattributes` normalizes text to LF, with CRLF for Windows batch files. Unreal packages, bulk-data sidecars, and binary source media use Git LFS without text conversion.
-- Git LFS was initialized with `git lfs install --local`. The local pre-push hook was inspected. No global Git settings or credentials were changed.
-- Git ignore probes verified 39 excluded paths and 28 preserved paths without creating sample files.
-- Attribute checks verified 25 binary extensions and 9 text paths. A local LFS clean/pointer/smudge round trip preserved binary bytes exactly. No project asset or remote LFS object upload was involved; remote asset transfer remains untested.
-
-On another development machine, install Git LFS and initialize it locally from the project root before adding binary assets:
+Launch the existing local package:
 
 ```powershell
 Set-Location "D:\personal projects\delusion"
-git lfs version
-git lfs install --local
+& ".\Artifacts\Windows\Delusion.exe"
 ```
 
-## Windows environment audit
+Keep the entire package folder together. Packaged binaries are ignored local outputs; a Git clone contains the source and LFS assets, not this executable.
 
-These are observed local results, not proof that an Unreal project can compile.
-
-| Component | Observed result |
+| Input | Action |
 | --- | --- |
-| OS | Windows 11 Home Single Language, 64-bit, build 10.0.26200 |
-| CPU | AMD Ryzen AI 7 350, 8 cores / 16 logical processors |
-| Installed RAM | 24 GiB |
-| GPU | AMD Radeon 860M Graphics; driver 32.0.22024.3004 |
-| Visual Studio tooling | Visual Studio Build Tools 2026, installation 18.8.12009.203; full IDE not detected |
-| MSVC | Toolset directory 14.51.36231; x64 compiler reports 19.51.36248 |
-| MSBuild | Executable launches and reports 18.8.2.30814 |
-| Windows SDK | 10.0.26100.0; Windows headers, x64 kernel32.lib, and rc.exe found |
-| Git | 2.55.0.windows.2 |
-| Git LFS | 3.7.1 |
-| Free space at audit | C: 29.38 GiB; D: 180.88 GiB; E: 120.71 GiB |
-| Unreal Engine 5.8 | No installation detected in audited locations; actual installation path unverified |
+| W / A / S / D | Move |
+| Mouse | Rotate camera |
+| Left Shift | Sprint |
+| Space | Jump |
+| E | Interact when the terminal prompt appears |
+| Escape | Pause / resume |
+| Resume / Quit | Pause-menu buttons |
 
-The compiler launched for `cl /Bv` and reported its version. It then returned `D8003: missing source filename`, as expected with no source file supplied. No C++ compilation was claimed or performed.
+The player spawns on the marked road area. Approach the terminal and press E to toggle its visible state.
 
-## Unreal installation blocker
+## Build and test
 
-Unreal Editor, UnrealBuildTool, and AutomationTool were not found in the inspected locations. The usual Epic launcher installation list, launcher manifests, and Unreal installation registry keys were absent.
+Use the existing project at `D:\personal projects\delusion\Delusion.uproject`. Verified dependencies are Unreal Engine 5.8.4 at `D:\Epic Games\UE_5.8`, MSVC 14.50.35740 and Windows SDK 10.0.26100.0. Preserve installed tools; there is no outstanding installation blocker.
 
-The installation search covered `C:\Program Files`, `C:\Program Files (x86)`, `D:\applications`, and `D:\technologies`, plus common Epic/Unreal engine roots. The `C:\Program Files\WindowsApps` subtree returned `Access is denied` (OS error 5). This was a bounded search, not proof about every directory on the machine.
+Run commands from the permanent root:
 
-Engine-dependent work is stopped until an actual Unreal Engine 5.8 stable installation is available and its path and version are verified. Unreal compilation, editor loading, cooking, packaging, and gameplay have not been tested.
+```powershell
+Set-Location "D:\personal projects\delusion"
+.\Scripts\Build.ps1 -Target Editor
+.\Scripts\Build.ps1 -Target Game
+.\Scripts\Test.ps1 -Target Editor -Visible
+.\Scripts\Build.ps1 -Target Package
+.\Scripts\Test.ps1 -Target Packaged -Visible
+```
 
-To unblock:
+Each command serves a separate purpose; packaging builds both C++ targets itself. `-Target ProjectFiles` generates ignored IDE project files when needed. Tests use the already built binaries, so rebuild after changing C++ and repackage before testing updated packaged gameplay.
 
-1. Install [Epic Games Launcher](https://www.unrealengine.com/download) if necessary and sign in with your own Epic account.
-2. In the launcher, open Unreal Engine > Library, add an engine version, and select a stable 5.8 release. Install the editor and Windows build/packaging support. Keep the engine installation outside this Git repository; keep every DELUSION project file in the permanent project root.
-3. Provide the actual installed engine root, or allow the next session to discover it. A proposed or example path is not installation evidence.
-4. Verify `Engine\Build\Build.version` reports major version 5 and minor version 8, and inspect these installed files relative to that root:
-   - `Engine\Binaries\Win64\UnrealEditor.exe`
-   - `Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.dll`
-   - `Engine\Build\BatchFiles\Build.bat`
-   - `Engine\Build\BatchFiles\RunUAT.bat`
-5. Use the installed engine's toolchain checks and a real project build to establish compiler compatibility. Resolve any actual missing component or compiler-version errors before proceeding.
+The test runner executes `Delusion.Sprint0.Playable`, requires a fresh successful JSON report and exit status, and prints the report location under `Saved\Automation`. Its Editor target runs the game through Unreal Editor; the Packaged target runs the archived Windows game. Test windows close after completion. Omit `-Visible` for unattended checks.
 
-Epic confirms that [Unreal Engine 5.8 is available through the launcher](https://www.unrealengine.com/news/unreal-engine-5-8-is-now-available). Its [Visual Studio setup guide](https://dev.epicgames.com/documentation/en-us/unreal-engine/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine) documents version compatibility and C++ components. No download or installation was performed during repository setup.
+The first cook and shader compilation may take substantial time. The scripts check disk space, pin the verified compiler, limit parallel C++ actions, and direct supported temporary files, DDC, UBA data and logs to ignored D: project locations using process-scoped settings.
 
-## Next engineering checkpoint
+## Open the full editor
 
-After the engine gate is satisfied, create the C++ project descriptor and module/target files individually under the mandatory one-file/commit/push workflow. Import any necessary generator output one file at a time. Do not run a generator that creates multiple version-controlled files directly in this repository.
+After building the Editor target, use a fresh PowerShell session for these process-local cache settings. They do not change Windows user or machine environment settings.
 
-Then implement and integrate:
+```powershell
+Set-Location "D:\personal projects\delusion"
+$projectRoot = (Get-Location).Path
+New-Item -ItemType Directory -Force -Path "Saved\Temp","Saved\Logs","DerivedDataCache" | Out-Null
+$env:TEMP = "$projectRoot\Saved\Temp"
+$env:TMP = $env:TEMP
+${env:UE-LocalDataCachePath} = "$projectRoot\DerivedDataCache"
+& "D:\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe" "$projectRoot\Delusion.uproject" -dx11 "-UserDir=$projectRoot\Saved\EditorUser" "-AbsLog=$projectRoot\Saved\Logs\Editor.log"
+```
 
-- WASD movement, mouse camera, Space to jump, Shift to sprint, gravity, and collisions.
-- A third-person follow camera with pitch constraints and camera collision handling.
-- A compact greybox with ground, buildings, a short road, obstacles, lighting, and a recognizable spawn.
-- A reusable E-key interaction with an approach prompt and one test object.
-- A minimal DELUSION HUD.
+The startup map is `/Game/Maps/Prototype`. Press Play for the player camera. Fab and Android File Server are disabled in this project. Do not modify Windows security policies or signed engine files.
 
-Keep future local packaged outputs under the ignored `D:\personal projects\delusion\Artifacts\Windows` destination. The final acceptance test must launch the packaged executable, exercise movement/camera/sprint/jump/collision/interaction, and exit normally. Editor-only play does not complete Sprint 0. Vehicle and Sprint 1 work remain out of scope until those criteria are met.
+## Project layout
+
+- `Source/Delusion`: native character, neighborhood, interaction interface/component, terminal, player controller, HUD, game mode and gameplay smoke test.
+- `Config`: input, startup map, packaging and conservative graphics defaults.
+- `Content/Maps/Prototype.umap`: saved playable map.
+- `Content/Materials/M_PrototypeSurface.uasset`: original greybox material.
+- `Scripts`: build/package runner, gameplay test runner and one-asset-at-a-time generation utility. The assets already exist; do not rerun generation to resume work.
+- `Artifacts/Windows`: local packaged Windows build.
+- `Saved`, `Intermediate`, `Binaries`, `DerivedDataCache`: ignored generated data.
+
+The map and material use Git LFS. Their uploads were verified. Git LFS must be available when checking out assets on another machine.
+
+## Development rules and scope
+
+Read [AGENTS.md](AGENTS.md) before changing files. Keep all project work in `D:\personal projects\delusion`, use local Git on `main` with `origin`, and follow **one changed file, one verified commit, one successful push before the next file**. Preserve the exact required author/committer identity and all history restrictions.
+
+The prototype uses DX11, low scalability, simple collision and lightweight geometry for the Radeon 860M. Character art is an unanimated primitive placeholder. Sustained performance, long-session stability, Shipping builds and other PCs still need validation. The recommended next step is owner playtesting, animation and movement/camera/performance refinement. Vehicles, combat and larger world systems have not started.

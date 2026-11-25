@@ -10,6 +10,8 @@
 #include "Components/VerticalBoxSlot.h"
 #include "DelusionInteractionComponent.h"
 #include "DelusionPlayerController.h"
+#include "DelusionVehicle.h"
+#include "DelusionVehicleSeatComponent.h"
 #include "Input/Reply.h"
 #include "InputCoreTypes.h"
 #include "Styling/CoreStyle.h"
@@ -42,9 +44,12 @@ void UDelusionHUDWidget::NativeOnInitialized()
         return Slot;
     };
     Place(MakeText(TEXT("DELUSION"), 28, FLinearColor(0.15f, 0.8f, 1.0f)), FVector2D(0, 0), FVector2D(0, 0), FVector2D(24, 18));
-    Place(MakeText(TEXT("FIRST DISTRICT  /  SPRINT 0"), 12, FLinearColor::White), FVector2D(0, 0), FVector2D(0, 0), FVector2D(25, 56));
-    Place(MakeText(TEXT("WASD  Move    Mouse  Camera    Shift  Sprint\nSpace  Jump    E  Interact    Esc  Pause"), 14, FLinearColor::White),
-        FVector2D(0, 1), FVector2D(0, 1), FVector2D(24, -22));
+    Place(MakeText(TEXT("FIRST DISTRICT"), 12, FLinearColor::White), FVector2D(0, 0), FVector2D(0, 0), FVector2D(25, 56));
+    ControlsText = MakeText(TEXT("WASD  Move    Mouse  Camera    Shift  Sprint\nSpace  Jump    E  Interact    Esc  Pause"), 14, FLinearColor::White);
+    Place(ControlsText, FVector2D(0, 1), FVector2D(0, 1), FVector2D(24, -22));
+    VehicleText = MakeText(TEXT(""), 22, FLinearColor::White);
+    Place(VehicleText, FVector2D(1, 1), FVector2D(1, 1), FVector2D(-24, -22));
+    VehicleText->SetVisibility(ESlateVisibility::Collapsed);
 
     PromptPanel = WidgetTree->ConstructWidget<UBorder>();
     PromptPanel->SetBrushColor(FLinearColor(0.015f, 0.025f, 0.04f, 0.92f));
@@ -83,9 +88,29 @@ void UDelusionHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTi
 {
     Super::NativeTick(MyGeometry, InDeltaTime);
     const ADelusionPlayerController* Player = Cast<ADelusionPlayerController>(GetOwningPlayer());
+    const ADelusionVehicle* Vehicle = Player ? Cast<ADelusionVehicle>(Player->GetPawn()) : nullptr;
+    if (ControlsText && bShowingDrivingControls != (Vehicle != nullptr))
+    {
+        bShowingDrivingControls = Vehicle != nullptr;
+        ControlsText->SetText(FText::FromString(Vehicle
+            ? TEXT("W  Accelerate    S  Brake / Reverse    A/D  Steer\nSpace  Handbrake    Mouse  Camera    E  Exit    Esc  Pause")
+            : TEXT("WASD  Move    Mouse  Camera    Shift  Sprint\nSpace  Jump    E  Interact    Esc  Pause")));
+    }
+    if (VehicleText)
+    {
+        VehicleText->SetVisibility(Vehicle && !Player->IsPaused()
+            ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+        if (Vehicle)
+        {
+            const FText Status = FText::FromString(FString::Printf(TEXT("%.0f km/h\n%s"), Vehicle->GetSpeedKmh(),
+                Vehicle->GetSpeedKmh() > Vehicle->GetSeat()->GetMaximumExitSpeed()
+                    ? TEXT("Slow down to exit") : TEXT("E  Exit vehicle")));
+            if (!VehicleText->GetText().EqualTo(Status)) { VehicleText->SetText(Status); }
+        }
+    }
     if (Player && PromptText && PromptPanel)
     {
-        const FText Prompt = Player->GetInteraction()->GetPrompt();
+        const FText Prompt = Vehicle ? FText::GetEmpty() : Player->GetInteraction()->GetPrompt();
         if (!PromptText->GetText().EqualTo(Prompt)) { PromptText->SetText(Prompt); }
         PromptPanel->SetVisibility(!Player->IsPaused() && !Prompt.IsEmpty()
             ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
@@ -105,9 +130,14 @@ void UDelusionHUDWidget::SetPauseMenuVisible(bool bVisible)
 
 void UDelusionHUDWidget::ShowInteractionFeedback()
 {
+    ShowMessage(NSLOCTEXT("Delusion", "InteractionSucceeded", "Terminal updated"));
+}
+
+void UDelusionHUDWidget::ShowMessage(const FText& Message)
+{
     if (FeedbackText)
     {
-        FeedbackText->SetText(NSLOCTEXT("Delusion", "InteractionSucceeded", "Terminal updated"));
+        FeedbackText->SetText(Message);
         FeedbackTimeRemaining = 3.0f;
     }
 }

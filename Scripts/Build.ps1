@@ -56,14 +56,14 @@ try {
             '-NoCompile', '-NoCompileUAT', 'BuildCookRun', "-project=$projectRoot\Delusion.uproject",
             '-noP4', '-platform=Win64', '-clientconfig=Development', '-skipbuild', '-skipbuildeditor',
             '-cook', '-stage', '-pak', '-iostore', '-package', '-archive',
-            "-archivedirectory=$projectRoot\Artifacts\Windows", '-map=/Game/Maps/Prototype',
+            "-archivedirectory=$projectRoot\Artifacts\Sprint1\Windows", '-map=/Game/Maps/Prototype',
             '-AdditionalCookerOptions=-CookProcessCount=1', '-unattended', '-utf8output'
         )
         & $automationTool @packageArguments
         if ($LASTEXITCODE -ne 0) {
             throw "Windows packaging failed with exit code $LASTEXITCODE. See Saved\Logs\AutomationTool."
         }
-        Write-Host "Windows package archived under $projectRoot\Artifacts\Windows."
+        Write-Host "Windows package archived under $projectRoot\Artifacts\Sprint1\Windows."
     } else {
         $buildArguments = @($buildTool)
         if ($Target -eq 'ProjectFiles') {

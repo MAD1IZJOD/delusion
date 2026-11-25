@@ -1,6 +1,9 @@
 param(
     [ValidateSet('Editor', 'Packaged')]
     [string]$Target = 'Editor',
+    [ValidateSet('Sprint0', 'Sprint1', 'All')]
+    [string]$Suite = 'All',
+    [string]$PackageDirectory = 'Artifacts\Sprint1\Windows',
     [ValidateRange(30, 1800)]
     [int]$TimeoutSeconds = 600,
     [switch]$Visible
@@ -9,6 +12,12 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 if ((Get-Location).Path -ne $projectRoot) { throw "Run this script from $projectRoot." }
+$expectedTests = @(switch ($Suite) {
+    'Sprint0' { @('Delusion.Sprint0.Playable') }
+    'Sprint1' { @('Delusion.Sprint1.Vehicle') }
+    'All' { @('Delusion.Sprint0.Playable', 'Delusion.Sprint1.Vehicle') }
+})
+$testFilter = if ($Suite -eq 'All') { 'Delusion.' } else { $expectedTests[0] }
 
 $testArguments = @()
 if ($Target -eq 'Editor') {
@@ -16,7 +25,11 @@ if ($Target -eq 'Editor') {
     $testArguments += '"' + "$projectRoot\Delusion.uproject" + '"'
     $testArguments += '-game'
 } else {
-    $candidates = @(Get-ChildItem -LiteralPath "$projectRoot\Artifacts\Windows" -Filter 'Delusion.exe' -File -Recurse |
+    $packageRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot $PackageDirectory))
+    if (-not $packageRoot.StartsWith("$projectRoot\Artifacts\", [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Test packages must remain inside the project Artifacts directory.'
+    }
+    $candidates = @(Get-ChildItem -LiteralPath $packageRoot -Filter 'Delusion.exe' -File -Recurse |
         Where-Object { $_.FullName -like '*\Binaries\Win64\Delusion.exe' })
     if ($candidates.Count -ne 1) { throw 'Expected exactly one archived Windows game binary. Package the game first.' }
     $executable = $candidates[0].FullName
@@ -33,7 +46,7 @@ $testArguments += @(
     '-NoSplash', '-NoLiveCoding', '-NoSound',
     ('-UserDir="' + "$projectRoot\Saved\TestUser" + '"'),
     ('-AbsLog="' + $logPath + '"'),
-    '-ExecCmds="Automation RunTests Delusion.Sprint0.Playable"',
+    ('-ExecCmds="Automation RunTests ' + $testFilter + '"'),
     '-TestExit="Automation Test Queue Empty"',
     ('-ReportExportPath="' + $reportPath + '"')
 )
@@ -62,11 +75,12 @@ try {
     }
     # TestExit can return zero even when assertions fail. Require the actual report.
     $report = Get-Content -LiteralPath "$reportPath\index.json" -Raw | ConvertFrom-Json
-    $result = @($report.tests | Where-Object fullTestPath -EQ 'Delusion.Sprint0.Playable')
-    if ($testProcess.ExitCode -ne 0 -or $report.failed -ne 0 -or $result.Count -ne 1 -or $result[0].state -ne 'Success') {
+    $results = @($report.tests | Where-Object { $_.fullTestPath -in $expectedTests })
+    $passedNames = @($results | Where-Object state -EQ 'Success' | Select-Object -ExpandProperty fullTestPath -Unique)
+    if ($testProcess.ExitCode -ne 0 -or $report.failed -ne 0 -or $passedNames.Count -ne $expectedTests.Count) {
         throw "Gameplay smoke test failed. Inspect $reportPath."
     }
-    Write-Host "PASS: Delusion.Sprint0.Playable ($Target)"
+    Write-Host "PASS: $($expectedTests -join ', ') ($Target)"
     Write-Host "Report: $reportPath\index.json"
     Write-Host "Log: $logPath"
 } finally {

@@ -158,6 +158,21 @@ After pushing, verify that the remote received that exact commit and that the lo
 - Do not empty the Recycle Bin or clear unrelated browser, application, or account data without approval. Ask before ambiguous or destructive cleanup.
 - Report actual free space before and after significant installation or cleanup operations. Preserve existing compilers, SDKs, and development tools. Do not bypass UAC or other security prompts.
 
+## Current playable prototype checkpoint (2026-11-25)
+
+- The older dated missing-engine and missing-compiler observations below are historical. Unreal Engine 5.8.4, MSVC 14.50.35740 and Windows SDK 10.0.26100.0 have now compiled this project successfully. Do not reinstall tools or restart project creation to resume work.
+- `Delusion.uproject`, the C++ gameplay module, Prototype map and original surface material already exist. Preserve them. Do not rerun `Scripts/CreatePrototypeAssets.py` to recreate existing assets.
+- Both DelusionEditor and Delusion Win64 Development targets built successfully. AutomationTool completed the actual Windows cook, stage, package and archive with exit 0.
+- The full Unreal Editor opened Prototype and rendered the neighborhood; map check reported 0 errors and 0 warnings. The editor then closed normally.
+- `Delusion.Sprint0.Playable` passed in source/editor-hosted gameplay and in the packaged executable. Coverage includes movement, sprint, jumping/landing, camera input and collision, building collision, interaction, HUD and pause/resume. The packaged JSON report recorded 1 success, 0 failures and 0 warnings. Physical pause-menu Resume and Quit clicks were also checked; normal launcher exit was 0.
+- The local packaged launcher is `D:\personal projects\delusion\Artifacts\Windows\Delusion.exe`. Keep its entire folder together. Generated executables, cooked/staged data, reports and logs remain ignored.
+- Use `Scripts/Build.ps1 -Target Editor`, `Game`, `ProjectFiles` or `Package` from the root. Use `Scripts/Test.ps1 -Target Editor` or `Packaged` for gameplay tests; add `-Visible` for a visible run. Rebuild and repackage changed gameplay before testing that package. A zero automation process exit alone is insufficient; require a fresh successful JSON test result.
+- The scripts restore prior process environment values and direct TEMP, TMP, DOTNET_CLI_HOME, UE-LocalDataCachePath, UBA_ROOT and AutomationTool logs to D: project locations. Use the documented D: cache/user-data settings in README for full editor launches. Process-local settings do not persist into another shell.
+- The optional Fab and Android File Server plugins are disabled in the project. Preserve Windows security policies. Do not reintroduce generated Android File Server settings or tokens.
+- Read `SPRINT0_REPORT.md` for actual evidence paths, implementation commits, storage measurements and limitations. The tested gameplay baseline is `fd29b3b`; later delivery documentation does not alter the binary.
+- The first playable slice uses a primitive unanimated character and greybox art. Sustained performance, long-session stability, Shipping builds and other PCs remain unverified. The recommended next work is owner playtesting, animation and movement/camera/performance refinement. Vehicles and other scope expansion have not been started or authorized by this checkpoint.
+- Continue to perform the mandatory Git preflight and every one-file/commit/push step. Recheck engine/toolchain components when a relevant condition changes; do not repeat installation work for already verified components.
+
 ## Verified environment checkpoint and compiler requirement
 
 - Unreal Engine 5.8.4 is installed at `D:\Epic Games\UE_5.8`. Do not download or reinstall it. Repeat already completed engine checks only when a relevant condition changes.

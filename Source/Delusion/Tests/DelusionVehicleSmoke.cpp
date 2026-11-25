@@ -3,6 +3,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Blueprint/WidgetTree.h"
+#include "ChaosVehicleWheel.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"

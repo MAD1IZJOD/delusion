@@ -36,7 +36,7 @@ ADelusionVehicle::ADelusionVehicle()
     UChaosWheeledVehicleMovementComponent* Movement = GetDrivingMovement();
     Movement->SetIsReplicated(false);
     // Process the explicitly reset parking brake even while there is no driver.
-    Movement->bRequiresControllerForInputs = false;
+    Movement->SetRequiresControllerForInputs(false);
     Movement->Mass = 1250.0f;
     Movement->bEnableCenterOfMassOverride = true;
     Movement->CenterOfMassOverride = FVector(0, 0, -15);
@@ -46,8 +46,6 @@ ADelusionVehicle::ADelusionVehicle()
     Movement->DownforceCoefficient = 0.3f;
     Movement->bReverseAsBrake = true;
     Movement->bThrottleAsBrake = true;
-    Movement->IdleBrakeInput = 0.1f;
-    Movement->WrongDirectionThreshold = 50.0f;
 
     Movement->WheelSetups.SetNum(4);
     const FName WheelBones[] = {TEXT("Phys_Wheel_FL"), TEXT("Phys_Wheel_FR"), TEXT("Phys_Wheel_BL"), TEXT("Phys_Wheel_BR")};
@@ -112,7 +110,7 @@ ADelusionVehicle::ADelusionVehicle()
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Game/Materials/M_PrototypeSurface.M_PrototypeSurface"));
     SurfaceMaterial = Material.Object;
-    auto AddBody = [this, &Cube](const TCHAR* PartName, FVector Position, FVector Size, FName ColorTag)
+    auto AddBody = [this](const TCHAR* PartName, FVector Position, FVector Size, FName ColorTag)
     {
         UStaticMeshComponent* Part = CreateDefaultSubobject<UStaticMeshComponent>(PartName);
         Part->SetupAttachment(GetMesh());

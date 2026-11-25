@@ -23,6 +23,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "InputKeyEventArgs.h"
 #include "Misc/AutomationTest.h"
+#include "PhysicsEngine/BodyInstance.h"
 #include "UObject/UObjectIterator.h"
 
 namespace DelusionVehicleSmoke
@@ -199,6 +200,15 @@ private:
             Test->TestTrue(TEXT("Upright at rest"), Car->GetActorUpVector().Z > 0.95);
             Test->AddInfo(FString::Printf(TEXT("Rest Z %.2f cm; mass %.0f kg; speed %.3f km/h"),
                 Car->GetActorLocation().Z, Car->GetMesh()->GetMass(), Car->GetSpeedKmh()));
+            const FBodyInstance* Chassis = Car->GetMesh()->GetBodyInstance(TEXT("Phys_Body"));
+            Test->TestNotNull(TEXT("Chassis physics body exists"), Chassis);
+            if (Chassis)
+            {
+                Test->TestTrue(TEXT("Configured chassis mass reaches the physics body"),
+                    FMath::IsNearlyEqual(Chassis->GetBodyMass(), Car->GetDrivingMovement()->Mass, 1.0f));
+                Test->AddInfo(FString::Printf(TEXT("Simulated chassis mass %.0f kg; all skeletal bodies %.0f kg"),
+                    Chassis->GetBodyMass(), Car->GetMesh()->GetMass()));
+            }
         });
         Add(TEXT("Reject distant entry"), 0.3, [this]
         {
@@ -391,6 +401,14 @@ private:
             Test->TestTrue(TEXT("Chassis remains upright after collision"), Car->GetActorUpVector().Z > 0.7);
             Test->TestTrue(TEXT("Impact does not produce runaway velocity"), Car->GetSpeedKmh() < 15);
             Test->AddInfo(FString::Printf(TEXT("Building stop X %.1f cm; speed %.2f km/h"), Car->GetActorLocation().X, Car->GetSpeedKmh()));
+        });
+        Add(TEXT("Chase camera obstruction"), 0.8, [this]
+        {
+            Player->SetControlRotation(FRotator(-12, 0, 0));
+        }, [this]
+        {
+            const USpringArmComponent* Boom = Car->FindComponentByClass<USpringArmComponent>();
+            Test->TestTrue(TEXT("Building retracts the chase camera"), Boom && Boom->IsCollisionFixApplied());
         });
     }
     void Cleanup()

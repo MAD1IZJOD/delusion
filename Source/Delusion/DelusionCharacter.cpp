@@ -156,6 +156,19 @@ void ADelusionCharacter::SetSprinting(bool bSprinting)
 void ADelusionCharacter::StartSprint() { SetSprinting(true); }
 void ADelusionCharacter::StopSprint() { SetSprinting(false); }
 
+void ADelusionCharacter::UnPossessed()
+{
+    if (InputSubsystem.IsValid() && MovementMapping)
+    {
+        InputSubsystem->RemoveMappingContext(MovementMapping);
+    }
+    MovementMapping = nullptr;
+    InputSubsystem.Reset();
+    SetSprinting(false);
+    StopJumping();
+    Super::UnPossessed();
+}
+
 void ADelusionCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     if (InputSubsystem.IsValid() && MovementMapping)

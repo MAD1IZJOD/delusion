@@ -19,6 +19,7 @@ class DELUSION_API ADelusionCharacter : public ACharacter
 public:
     ADelusionCharacter();
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    virtual void UnPossessed() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
     UFUNCTION(BlueprintCallable, Category="Movement")

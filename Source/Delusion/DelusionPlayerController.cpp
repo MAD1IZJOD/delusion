@@ -4,6 +4,9 @@
 #include "DelusionCharacter.h"
 #include "DelusionHUDWidget.h"
 #include "DelusionInteractionComponent.h"
+#include "DelusionVehicle.h"
+#include "DelusionVehicleInputComponent.h"
+#include "DelusionVehicleSeatComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -53,9 +56,27 @@ void ADelusionPlayerController::SetupInputComponent()
 
 void ADelusionPlayerController::Interact()
 {
-    if (!IsPaused() && Interaction->TryInteract() && HUDWidget)
+    if (IsPaused()) { return; }
+    if (ADelusionVehicle* ControlledVehicle = Cast<ADelusionVehicle>(GetPawn()))
     {
-        HUDWidget->ShowInteractionFeedback();
+        const bool bExited = ControlledVehicle->GetSeat()->TryExit(this);
+        if (HUDWidget)
+        {
+            HUDWidget->ShowMessage(bExited
+                ? NSLOCTEXT("Delusion", "VehicleExited", "Back on foot")
+                : ControlledVehicle->GetSpeedKmh() > ControlledVehicle->GetSeat()->GetMaximumExitSpeed()
+                    ? NSLOCTEXT("Delusion", "ExitTooFast", "Slow down before exiting")
+                    : NSLOCTEXT("Delusion", "ExitBlocked", "No clear exit. Move the vehicle away from obstacles."));
+        }
+        return;
+    }
+    if (Interaction->TryInteract() && HUDWidget)
+    {
+        if (Cast<ADelusionVehicle>(GetPawn()))
+        {
+            HUDWidget->ShowMessage(NSLOCTEXT("Delusion", "VehicleEntered", "Vehicle entered"));
+        }
+        else { HUDWidget->ShowInteractionFeedback(); }
     }
 }
 
@@ -70,6 +91,10 @@ void ADelusionPlayerController::TogglePause()
     {
         ControlledCharacter->SetSprinting(false);
         ControlledCharacter->StopJumping();
+    }
+    if (ADelusionVehicle* ControlledVehicle = Cast<ADelusionVehicle>(GetPawn()))
+    {
+        ControlledVehicle->GetDriverInput()->ResetControls(bPauseNow);
     }
     bShowMouseCursor = bPauseNow;
     if (HUDWidget) { HUDWidget->SetPauseMenuVisible(bPauseNow); }

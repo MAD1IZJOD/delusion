@@ -42,6 +42,7 @@ void UDelusionInteractionComponent::RefreshTarget()
     FCollisionObjectQueryParams ObjectTypes;
     ObjectTypes.AddObjectTypesToQuery(ECC_WorldStatic);
     ObjectTypes.AddObjectTypesToQuery(ECC_WorldDynamic);
+    ObjectTypes.AddObjectTypesToQuery(ECC_Vehicle);
     FCollisionQueryParams Query(SCENE_QUERY_STAT(DelusionInteractionOverlap), false, Interactor);
     GetWorld()->OverlapMultiByObjectType(Nearby, Interactor->GetActorLocation(), FQuat::Identity,
         ObjectTypes, FCollisionShape::MakeSphere(MaxInteractionDistance), Query);

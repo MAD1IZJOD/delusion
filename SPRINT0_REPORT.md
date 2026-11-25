@@ -77,9 +77,9 @@ Storage snapshots, rounded GiB:
 | D: free before packaging | 137.72 GiB |
 | C: free after packaging and verification | 16.43 GiB |
 | D: free after packaging and verification | 132.81 GiB |
-| Whole project, including ignored outputs | Approximately 7.65 GiB |
+| Whole project, including ignored outputs | Approximately 7.76 GiB |
 | Intermediate | Approximately 4.53 GiB |
-| Saved, including cooked/staged data and logs | Approximately 1.22 GiB |
+| Saved, including cooked/staged data and logs | Approximately 1.34 GiB |
 | Artifacts, including archived Windows package | Approximately 0.88 GiB |
 | Binaries | Approximately 0.74 GiB |
 | DerivedDataCache | Approximately 0.27 GiB |

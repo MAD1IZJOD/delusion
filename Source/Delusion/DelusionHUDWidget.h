@@ -16,6 +16,7 @@ class DELUSION_API UDelusionHUDWidget : public UUserWidget
 public:
     void SetPauseMenuVisible(bool bVisible);
     void ShowInteractionFeedback();
+    void ShowMessage(const FText& Message);
 
 protected:
     virtual void NativeOnInitialized() override;
@@ -40,6 +41,14 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<UTextBlock> FeedbackText;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UTextBlock> ControlsText;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UTextBlock> VehicleText;
+
+    bool bShowingDrivingControls = false;
 
     float FeedbackTimeRemaining = 0.0f;
 };

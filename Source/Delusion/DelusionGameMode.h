@@ -12,4 +12,5 @@ class DELUSION_API ADelusionGameMode : public AGameModeBase
 
 public:
     ADelusionGameMode();
+    virtual void StartPlay() override;
 };

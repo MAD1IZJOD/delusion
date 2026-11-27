@@ -200,7 +200,7 @@ private:
             Test->TestTrue(TEXT("Upright at rest"), Car->GetActorUpVector().Z > 0.95);
             Test->AddInfo(FString::Printf(TEXT("Rest Z %.2f cm; mass %.0f kg; speed %.3f km/h"),
                 Car->GetActorLocation().Z, Car->GetMesh()->GetMass(), Car->GetSpeedKmh()));
-            const FBodyInstance* Chassis = Car->GetMesh()->GetBodyInstance(TEXT("Phys_Body"));
+            const FBodyInstance* Chassis = Car->GetMesh()->GetBodyInstance();
             Test->TestNotNull(TEXT("Chassis physics body exists"), Chassis);
             if (Chassis)
             {

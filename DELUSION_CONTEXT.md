@@ -28,7 +28,7 @@ DELUSION is an original single-player, third-person open-world action game for W
 ## Current repository state
 
 - Branch: `main`, in sync with `origin/main`.
-- Latest commit: `8b66684` record the sprint one delivery report.
+- Latest commit: `86c52e6` add the delusion project context file.
 - Working tree: clean.
 
 ## Current milestone
@@ -116,3 +116,4 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 - `f84058d` — add a sustained driving benchmark test — pushed.
 - `39b7683` — fix chassis body lookup in vehicle smoke test — pushed.
 - `8b66684` — record the sprint one delivery report — pushed.
+- `86c52e6` — add the delusion project context file — pushed.

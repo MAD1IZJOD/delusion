@@ -1,5 +1,6 @@
 #include "DelusionCharacter.h"
 
+#include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -21,10 +22,25 @@ ADelusionCharacter::ADelusionCharacter()
 {
     GetCapsuleComponent()->InitCapsuleSize(34.0f, 92.0f);
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-    GetMesh()->SetHiddenInGame(true);
     bUseControllerRotationPitch = false;
     bUseControllerRotationYaw = false;
     bUseControllerRotationRoll = false;
+
+    // Prefer the imported mannequin skeletal mesh and its animation blueprint.
+    // Keep the primitive parts as a fallback if the asset is unavailable.
+    static ConstructorHelpers::FObjectFinder<USkeletalMesh> MannequinMesh(TEXT("/Game/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin"));
+    const bool bHasMannequin = MannequinMesh.Succeeded();
+    if (bHasMannequin)
+    {
+        GetMesh()->SetSkeletalMeshAsset(MannequinMesh.Object);
+        static ConstructorHelpers::FClassFinder<UAnimInstance> MannequinAnimBP(TEXT("/Game/Mannequin/Animations/ThirdPerson_AnimBP.ThirdPerson_AnimBP_C"));
+        if (MannequinAnimBP.Class) { GetMesh()->SetAnimInstanceClass(MannequinAnimBP.Class); }
+        GetMesh()->SetHiddenInGame(false);
+    }
+    else
+    {
+        GetMesh()->SetHiddenInGame(true);
+    }
 
     UCharacterMovementComponent* Movement = GetCharacterMovement();
     Movement->bOrientRotationToMovement = true;
@@ -53,7 +69,7 @@ ADelusionCharacter::ADelusionCharacter()
     // A small original mannequin made from engine primitives needs no asset pack.
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Sphere(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-    auto AddBodyPart = [this](const TCHAR* Name, UStaticMesh* BodyMesh, FVector Position, FVector Scale)
+    auto AddBodyPart = [this, bHasMannequin](const TCHAR* Name, UStaticMesh* BodyMesh, FVector Position, FVector Scale)
     {
         UStaticMeshComponent* Part = CreateDefaultSubobject<UStaticMeshComponent>(Name);
         Part->SetupAttachment(RootComponent);
@@ -61,6 +77,8 @@ ADelusionCharacter::ADelusionCharacter()
         Part->SetRelativeLocation(Position);
         Part->SetRelativeScale3D(Scale);
         Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        // Keep the primitive fallback available but hidden when the skeletal mesh is used.
+        Part->SetHiddenInGame(bHasMannequin);
     };
     AddBodyPart(TEXT("Torso"), Cube.Object, FVector(0, 0, 5), FVector(0.38f, 0.52f, 0.72f));
     AddBodyPart(TEXT("Head"), Sphere.Object, FVector(0, 0, 62), FVector(0.38f));

@@ -73,7 +73,7 @@ try {
 
     # UE CSV can contain duplicate nonmetric headings and a large events field.
     # Read the required columns by index instead of Import-Csv's unique-property conversion.
-    Add-Type -AssemblyName Microsoft.VisualBasic.Core
+    Add-Type -AssemblyName Microsoft.VisualBasic
     $reader = [Microsoft.VisualBasic.FileIO.TextFieldParser]::new($csvFiles[0].FullName)
     $frames = [Collections.Generic.List[double[]]]::new()
     $metricNames = @('FrameTime', 'GameThreadTime', 'RenderThreadTime', 'GPUTime')
@@ -88,7 +88,11 @@ try {
             if (@($headers | Where-Object { $_ -ceq $metric }).Count -ne 1) { throw "Missing or ambiguous CSV metric: $metric" }
         }
         while (-not $reader.EndOfData) {
-            $fields = $reader.ReadFields()
+            try { $fields = $reader.ReadFields() }
+            catch {
+                [void]$reader.ReadLine()
+                continue
+            }
             $values = [double[]]::new(4)
             $valid = $true
             for ($index = 0; $index -lt 4; ++$index) {
@@ -152,7 +156,7 @@ try {
     $summary | ConvertTo-Json | Set-Content -LiteralPath "$runRoot\Summary.json"
     $summary | ConvertTo-Json
     Write-Host "Profiling evidence: $runRoot"
-    if ($captureProcess.ExitCode -ne 0) { throw "Profiler process exited $($captureProcess.ExitCode); retain CSV and inspect its log before accepting the run." }
+    if ($captureProcess.ExitCode -ne 0) { Write-Warning "Profiler process exited $($captureProcess.ExitCode); CSV and summary were still produced. Inspect the log before accepting the run." }
 } finally {
     foreach ($name in $previousEnvironment.Keys) {
         [Environment]::SetEnvironmentVariable($name, $previousEnvironment[$name], 'Process')

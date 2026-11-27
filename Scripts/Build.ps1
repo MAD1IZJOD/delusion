@@ -56,7 +56,7 @@ try {
             '-NoCompile', '-NoCompileUAT', 'BuildCookRun', "-project=$projectRoot\Delusion.uproject",
             '-noP4', '-platform=Win64', '-clientconfig=Development', '-skipbuild', '-skipbuildeditor',
             '-cook', '-stage', '-pak', '-iostore', '-package', '-archive',
-            "-archivedirectory=$projectRoot\Artifacts\Sprint1\Windows", '-map=/Game/Maps/Prototype',
+            "-archivedirectory=$projectRoot\Artifacts\Sprint2\Windows", '-map=/Game/Maps/Prototype',
             '-AdditionalCookerOptions=-CookProcessCount=1', '-unattended', '-utf8output'
         )
         & $automationTool @packageArguments

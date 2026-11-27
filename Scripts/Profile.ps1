@@ -1,5 +1,7 @@
 param(
     [string]$PackageDirectory = 'Artifacts\Sprint1\Windows',
+    [ValidateSet('Idle', 'Driving')]
+    [string]$Scenario = 'Idle',
     [ValidatePattern('^[A-Za-z0-9_-]+$')]
     [string]$Label = 'Sprint1Idle'
 )
@@ -36,11 +38,16 @@ try {
         [IO.Directory]::CreateDirectory($profileEnvironment[$name]) | Out-Null
         [Environment]::SetEnvironmentVariable($name, $profileEnvironment[$name], 'Process')
     }
+    $execCmds = if ($Scenario -eq 'Driving') {
+        'Automation RunTests Perf.DelusionDrive,t.MaxFPS 60,r.VSync 0,r.ScreenPercentage 80'
+    } else {
+        't.MaxFPS 60,r.VSync 0,r.ScreenPercentage 80'
+    }
     $arguments = @(
         '-dx11', '-windowed', '-ResX=1280', '-ResY=720', '-NoSplash', '-NoSound', '-unattended',
         '-csvCaptureFrames=3600', '-ExitAfterCsvProfiling', '-csvGpuStats', '-csvCompression=0',
         ('-UserDir="' + $runRoot + '\User"'), ('-AbsLog="' + $runRoot + '\Game.log"'),
-        '-ExecCmds="t.MaxFPS 60,r.VSync 0,r.ScreenPercentage 80"'
+        ('-ExecCmds="' + $execCmds + '"')
     )
     $watch = [Diagnostics.Stopwatch]::StartNew()
     $captureProcess = Start-Process -FilePath $games[0].FullName -ArgumentList $arguments -WindowStyle Normal -PassThru
@@ -109,8 +116,13 @@ try {
         return $sorted[$low] + ($sorted[$high] - $sorted[$low]) * ($position - $low)
     }
     $durationMs = ($frameTimes | Measure-Object -Sum).Sum
+    $scenarioDescription = if ($Scenario -eq 'Driving') {
+        'Sustained driving benchmark; enters the prototype car and drives a continuous circle; 600 warm-up and 1800 measured runtime frames'
+    } else {
+        'Static default spawn; no intentional input; 600 warm-up and 1800 measured runtime frames'
+    }
     $summary = [ordered]@{
-        Scenario = 'Static default spawn; no intentional input; 600 warm-up and 1800 measured runtime frames'
+        Scenario = $scenarioDescription
         Executable = $games[0].FullName
         Resolution = '1280x720 output; 80% render scale; low; DX11; VSync off; 60 FPS cap'
         Frames = $sample.Count
@@ -131,7 +143,11 @@ try {
         FirstWindowSeconds = $firstWindowSeconds
         ProcessExitCode = $captureProcess.ExitCode
         Capture = $csvFiles[0].FullName
-        Limitations = 'Idle view, not driving; frame cap active; other applications remain open; memory includes warm-up; first-window timing sampled at 250 ms.'
+        Limitations = if ($Scenario -eq 'Driving') {
+            'Driving benchmark, not a fixed idle view; frame cap active; other applications remain open; memory includes warm-up; first-window timing sampled at 250 ms.'
+        } else {
+            'Idle view, not driving; frame cap active; other applications remain open; memory includes warm-up; first-window timing sampled at 250 ms.'
+        }
     }
     $summary | ConvertTo-Json | Set-Content -LiteralPath "$runRoot\Summary.json"
     $summary | ConvertTo-Json

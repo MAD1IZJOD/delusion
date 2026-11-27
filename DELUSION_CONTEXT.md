@@ -28,12 +28,12 @@ DELUSION is an original single-player, third-person open-world action game for W
 ## Current repository state
 
 - Branch: `main`, in sync with `origin/main`.
-- Latest commit: `86c52e6` add the delusion project context file.
+- Latest commit: `b13a2f9` package sprint two separately from sprint one.
 - Working tree: clean.
 
 ## Current milestone
 
-Sprint 1 — Vehicle foundation. Objective: one genuinely drivable Chaos vehicle inside the existing neighborhood, with enter/exit, chase camera, HUD, packaged gameplay and measured performance. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 package unchanged.
+Sprint 2 Milestone 1 — Animated character. Objective: replace the primitive character with an animated third-person mannequin using imported UE 5.8 Mannequin assets, idle/walk/run/jump locomotion, and the existing vehicle system intact. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
 
 ## Implemented and verified
 
@@ -56,11 +56,19 @@ Sprint 1 — Vehicle foundation. Objective: one genuinely drivable Chaos vehicle
 - Sustained driving benchmark `Perf.DelusionDrive`: passed in packaged build.
 - Profiling: idle ~49.70 FPS (P99 32.64 ms, peak 710 MiB) and driving ~49.85 FPS (P99 32.52 ms, peak 707 MiB) at 1280x720 low DX11.
 - Sprint 0 package: all 49 payload hashes unchanged.
+- Sprint 2 Milestone 1: imported 26 Mannequin assets (skeleton, mesh, physics asset, 9 animations, blend space, AnimBP, materials, textures).
+- Sprint 2 Milestone 1: character now uses SK_Mannequin skeletal mesh with ThirdPerson_AnimBP (idle/walk/run/jump state machine).
+- Sprint 2 Milestone 1: primitive parts retained as hidden fallback when mannequin loads.
+- Sprint 2 Milestone 1: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
+- Sprint 2 Milestone 1: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
+- Sprint 2 Milestone 1: profiling idle ~46.45 FPS (P99 32.71 ms, peak 725 MiB) at 1280x720 low DX11.
 
 ## Not implemented / not verified
 
 - Vehicle animations, audio, damage model.
-- Character animation state machine (still primitive placeholder).
+- Character sprint animation (uses run animation; no dedicated sprint asset).
+- Character enter/exit vehicle animations (still procedural transform blend).
+- Camera refinement (on-foot and chase) — not yet tuned.
 - Traffic, NPCs, missions, combat, police.
 - Shipping configuration, other PCs, long-session stability, higher resolutions.
 - Driving camera second mode (V) is optional and not implemented.
@@ -80,7 +88,7 @@ Sprint 1 — Vehicle foundation. Objective: one genuinely drivable Chaos vehicle
 - Vehicle assets: `Content/Vehicles/SportsCar/{SK,PA,SKM}_SportsCar.uasset`.
 - Scripts: `Scripts/Build.ps1`, `Scripts/Test.ps1`, `Scripts/Profile.ps1`.
 - Reports: `SPRINT0_REPORT.md`, `SPRINT1_REPORT.md`.
-- Packages: `Artifacts/Windows` (Sprint 0), `Artifacts/Sprint1/Windows` (Sprint 1, ignored).
+- Packages: `Artifacts/Windows` (Sprint 0), `Artifacts/Sprint1/Windows` (Sprint 1, ignored), `Artifacts/Sprint2/Windows` (Sprint 2, ignored).
 - Hash manifest: `Saved/Sprint0PackagePayloadHashes.csv` (ignored).
 
 ## Build/test commands and results
@@ -105,9 +113,11 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 
 ## Next actions
 
-1. Sprint 2: character and vehicle animation state machines, enter/exit animations, camera refinement, vehicle sound.
-2. Optional: add a second camera mode (V) and vehicle damage.
-3. Re-run packaged tests after any gameplay change.
+1. Sprint 2 Milestone 2: import vehicle animation assets (ABP_SportsCar, CtrlRig_SportsCar) and wire to the vehicle mesh.
+2. Sprint 2 Milestone 3: implement enter/exit animations (procedural blend first, montages if authored).
+3. Sprint 2 Milestone 4: camera refinement (on-foot pitch, vehicle look-ahead).
+4. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
+5. Re-run packaged tests after any gameplay change.
 
 ## Recent change log
 
@@ -117,3 +127,7 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 - `39b7683` — fix chassis body lookup in vehicle smoke test — pushed.
 - `8b66684` — record the sprint one delivery report — pushed.
 - `86c52e6` — add the delusion project context file — pushed.
+- `75d589d` — update the delusion context file for sprint one completion — pushed.
+- `0638f36` through `1fe9805` — import 26 Mannequin assets — pushed.
+- `920d5f3` — use the mannequin skeletal mesh and animation blueprint — pushed.
+- `b13a2f9` — package sprint two separately from sprint one — pushed.

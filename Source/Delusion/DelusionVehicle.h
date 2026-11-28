@@ -12,6 +12,7 @@ class UDelusionVehicleSeatComponent;
 class UMaterialInterface;
 class USpringArmComponent;
 class UStaticMeshComponent;
+class USynthComponent;
 
 /** Standard Chaos four-wheel pawn, with independently owned input and seat behavior. */
 UCLASS(Blueprintable)
@@ -47,6 +48,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Camera")
     TObjectPtr<UCameraComponent> ChaseCamera;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Audio")
+    TObjectPtr<USynthComponent> EngineSynth;
 
     UPROPERTY(EditDefaultsOnly, Category="Appearance")
     TObjectPtr<UMaterialInterface> SurfaceMaterial;

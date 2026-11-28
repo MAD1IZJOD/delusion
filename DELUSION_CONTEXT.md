@@ -28,12 +28,12 @@ DELUSION is an original single-player, third-person open-world action game for W
 ## Current repository state
 
 - Branch: `main`, in sync with `origin/main`.
-- Latest commit: `960f62f` record the sprint two milestone three enter exit report.
+- Latest commit: `525d88a` record the sprint two milestone four camera report.
 - Working tree: clean.
 
 ## Current milestone
 
-Sprint 2 Milestone 3 — Enter/exit vehicle animations. Objective: replace instant-style entry/exit with sequenced, state-driven transitions using explicit states, camera blending and safe-position validation. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
+Sprint 2 Milestone 4 — Camera refinement. Objective: polish on-foot and vehicle camera systems with smoother lag, wider pitch limits, speed-sensitive look-ahead and consistent transitions. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
 
 ## Implemented and verified
 
@@ -75,12 +75,17 @@ Sprint 2 Milestone 3 — Enter/exit vehicle animations. Objective: replace insta
 - Sprint 2 Milestone 3: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
 - Sprint 2 Milestone 3: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
 - Sprint 2 Milestone 3: profiling idle ~49.05 FPS (P99 32.42 ms, peak 721 MiB) at 1280x720 low DX11.
+- Sprint 2 Milestone 4: on-foot camera lag speed 14→16, added rotation lag (speed 20).
+- Sprint 2 Milestone 4: vehicle camera lag speed 8→10, rotation lag 10→12, look-ahead offset added.
+- Sprint 2 Milestone 4: camera pitch limits widened to -70/+40.
+- Sprint 2 Milestone 4: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
+- Sprint 2 Milestone 4: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
 
 ## Not implemented / not verified
 
 - Vehicle enter/exit skeletal animations (still procedural transform blend; no animation assets exist).
 - Vehicle audio.
-- Camera refinement (on-foot and chase) — not yet tuned.
+- Optional V-key camera toggle (deferred).
 - Character sprint animation (uses run animation; no dedicated sprint asset).
 - Traffic, NPCs, missions, combat, police.
 - Shipping configuration, other PCs, long-session stability, higher resolutions.
@@ -126,9 +131,8 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 
 ## Next actions
 
-1. Sprint 2 Milestone 4: camera refinement (on-foot pitch limits, vehicle look-ahead, smoother follow).
-2. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
-3. Re-run packaged tests after any gameplay change.
+1. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
+2. Re-run packaged tests after any gameplay change.
 
 ## Recent change log
 
@@ -152,3 +156,8 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 - `14fa805` — implement sequenced vehicle entry and exit transitions — pushed.
 - `9765abe` — block interaction while vehicle transitions are active — pushed.
 - `960f62f` — record the sprint two milestone three enter exit report — pushed.
+- `a3d6c2f` — refine the on foot camera lag and rotation smoothing — pushed.
+- `54d46b3` — refine the vehicle chase camera and add speed look ahead — pushed.
+- `1998355` — widen the camera pitch limits — pushed.
+- `fdfc04b` — update camera pitch test limits for the refined camera — pushed.
+- `525d88a` — record the sprint two milestone four camera report — pushed.

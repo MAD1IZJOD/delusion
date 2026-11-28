@@ -59,7 +59,9 @@ ADelusionCharacter::ADelusionCharacter()
     CameraBoom->bDoCollisionTest = true;
     CameraBoom->ProbeSize = 12.0f;
     CameraBoom->bEnableCameraLag = true;
-    CameraBoom->CameraLagSpeed = 14.0f;
+    CameraBoom->CameraLagSpeed = 16.0f;
+    CameraBoom->bEnableCameraRotationLag = true;
+    CameraBoom->CameraRotationLagSpeed = 20.0f;
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);

@@ -28,12 +28,12 @@ DELUSION is an original single-player, third-person open-world action game for W
 ## Current repository state
 
 - Branch: `main`, in sync with `origin/main`.
-- Latest commit: `525d88a` record the sprint two milestone four camera report.
+- Latest commit: `9372e81` record the sprint two milestone five vehicle audio report.
 - Working tree: clean.
 
 ## Current milestone
 
-Sprint 2 Milestone 4 — Camera refinement. Objective: polish on-foot and vehicle camera systems with smoother lag, wider pitch limits, speed-sensitive look-ahead and consistent transitions. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
+Sprint 2 Milestone 5 — Vehicle audio. Objective: add procedural engine audio using USynthComponentToneGenerator with frequency/volume modulated by speed and throttle. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged. Sprint 2 is now complete.
 
 ## Implemented and verified
 
@@ -80,12 +80,20 @@ Sprint 2 Milestone 4 — Camera refinement. Objective: polish on-foot and vehicl
 - Sprint 2 Milestone 4: camera pitch limits widened to -70/+40.
 - Sprint 2 Milestone 4: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
 - Sprint 2 Milestone 4: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
+- Sprint 2 Milestone 5: Synthesis module linked in Delusion.Build.cs.
+- Sprint 2 Milestone 5: Metasound plugin enabled in Delusion.uproject.
+- Sprint 2 Milestone 5: USynthComponentToneGenerator added to vehicle (sawtooth, 80 Hz base, 0.15 volume).
+- Sprint 2 Milestone 5: frequency modulated by speed (80 + SpeedKmh * 6), volume by throttle and speed.
+- Sprint 2 Milestone 5: synth starts in BeginPlay, plays continuously regardless of possession.
+- Sprint 2 Milestone 5: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
+- Sprint 2 Milestone 5: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
 
 ## Not implemented / not verified
 
 - Vehicle enter/exit skeletal animations (still procedural transform blend; no animation assets exist).
-- Vehicle audio.
+- Layered MetaSounds engine audio (single oscillator only).
 - Optional V-key camera toggle (deferred).
+- Tire, wind, and impact sounds.
 - Character sprint animation (uses run animation; no dedicated sprint asset).
 - Traffic, NPCs, missions, combat, police.
 - Shipping configuration, other PCs, long-session stability, higher resolutions.
@@ -131,8 +139,9 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 
 ## Next actions
 
-1. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
-2. Re-run packaged tests after any gameplay change.
+1. Sprint 2 complete. All five milestones implemented and verified.
+2. Awaiting approval for Sprint 3 (world expansion) or further Sprint 2 refinement.
+3. Re-run packaged tests after any gameplay change.
 
 ## Recent change log
 
@@ -161,3 +170,9 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 - `1998355` — widen the camera pitch limits — pushed.
 - `fdfc04b` — update camera pitch test limits for the refined camera — pushed.
 - `525d88a` — record the sprint two milestone four camera report — pushed.
+- `8450045` — link the synthesis module for vehicle audio — pushed.
+- `58923ba` — enable the metasound plugin for vehicle audio — pushed.
+- `5eed7f2` — add a synth component to the vehicle — pushed.
+- `6303276` — add procedural engine audio using a synth component — pushed.
+- `7b463fa` — use the tone generator synth component — pushed.
+- `9372e81` — record the sprint two milestone five vehicle audio report — pushed.

@@ -28,12 +28,12 @@ DELUSION is an original single-player, third-person open-world action game for W
 ## Current repository state
 
 - Branch: `main`, in sync with `origin/main`.
-- Latest commit: `b13a2f9` package sprint two separately from sprint one.
+- Latest commit: `6b34d0e` record the sprint two milestone two vehicle animation report.
 - Working tree: clean.
 
 ## Current milestone
 
-Sprint 2 Milestone 1 — Animated character. Objective: replace the primitive character with an animated third-person mannequin using imported UE 5.8 Mannequin assets, idle/walk/run/jump locomotion, and the existing vehicle system intact. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
+Sprint 2 Milestone 2 — Vehicle animation. Objective: integrate the existing ABP_SportsCar and CtrlRig_SportsCar into the Chaos vehicle so wheels animate correctly while driving, steering, braking and reversing. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
 
 ## Implemented and verified
 
@@ -62,13 +62,19 @@ Sprint 2 Milestone 1 — Animated character. Objective: replace the primitive ch
 - Sprint 2 Milestone 1: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
 - Sprint 2 Milestone 1: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
 - Sprint 2 Milestone 1: profiling idle ~46.45 FPS (P99 32.71 ms, peak 725 MiB) at 1280x720 low DX11.
+- Sprint 2 Milestone 2: ControlRig plugin enabled in Delusion.uproject.
+- Sprint 2 Milestone 2: imported ABP_SportsCar and CtrlRig_SportsCar into Content/Vehicles/SportsCar/.
+- Sprint 2 Milestone 2: vehicle mesh now uses ABP_SportsCar (WheelController + ControlRig nodes).
+- Sprint 2 Milestone 2: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
+- Sprint 2 Milestone 2: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
+- Sprint 2 Milestone 2: profiling idle ~58.03 FPS (P99 33.78 ms, peak 728 MiB) at 1280x720 low DX11.
 
 ## Not implemented / not verified
 
-- Vehicle animations, audio, damage model.
-- Character sprint animation (uses run animation; no dedicated sprint asset).
-- Character enter/exit vehicle animations (still procedural transform blend).
+- Vehicle enter/exit animations (still procedural transform blend).
+- Vehicle audio.
 - Camera refinement (on-foot and chase) — not yet tuned.
+- Character sprint animation (uses run animation; no dedicated sprint asset).
 - Traffic, NPCs, missions, combat, police.
 - Shipping configuration, other PCs, long-session stability, higher resolutions.
 - Driving camera second mode (V) is optional and not implemented.
@@ -113,11 +119,10 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 
 ## Next actions
 
-1. Sprint 2 Milestone 2: import vehicle animation assets (ABP_SportsCar, CtrlRig_SportsCar) and wire to the vehicle mesh.
-2. Sprint 2 Milestone 3: implement enter/exit animations (procedural blend first, montages if authored).
-3. Sprint 2 Milestone 4: camera refinement (on-foot pitch, vehicle look-ahead).
-4. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
-5. Re-run packaged tests after any gameplay change.
+1. Sprint 2 Milestone 3: implement enter/exit animations (procedural blend first, montages if authored).
+2. Sprint 2 Milestone 4: camera refinement (on-foot pitch, vehicle look-ahead).
+3. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
+4. Re-run packaged tests after any gameplay change.
 
 ## Recent change log
 
@@ -131,3 +136,9 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 - `0638f36` through `1fe9805` — import 26 Mannequin assets — pushed.
 - `920d5f3` — use the mannequin skeletal mesh and animation blueprint — pushed.
 - `b13a2f9` — package sprint two separately from sprint one — pushed.
+- `484bce0` — update the delusion context file for sprint two milestone one — pushed.
+- `3dfd0b4` — enable the control rig plugin for vehicle animation — pushed.
+- `e8629ac` — import the sports car animation blueprint — pushed.
+- `cf192ed` — import the sports car control rig — pushed.
+- `1af6c4b` — use the sports car animation blueprint — pushed.
+- `6b34d0e` — record the sprint two milestone two vehicle animation report — pushed.

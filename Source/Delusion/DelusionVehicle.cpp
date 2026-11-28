@@ -1,5 +1,6 @@
 #include "DelusionVehicle.h"
 
+#include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -25,6 +26,8 @@ ADelusionVehicle::ADelusionVehicle()
 
     static ConstructorHelpers::FObjectFinder<USkeletalMesh> Rig(TEXT("/Game/Vehicles/SportsCar/SKM_SportsCar.SKM_SportsCar"));
     GetMesh()->SetSkeletalMeshAsset(Rig.Object);
+    static ConstructorHelpers::FClassFinder<UAnimInstance> VehicleAnimBP(TEXT("/Game/Vehicles/SportsCar/ABP_SportsCar.ABP_SportsCar_C"));
+    if (VehicleAnimBP.Class) { GetMesh()->SetAnimInstanceClass(VehicleAnimBP.Class); }
     GetMesh()->SetCollisionProfileName(TEXT("Vehicle"));
     GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
     GetMesh()->SetSimulatePhysics(true);

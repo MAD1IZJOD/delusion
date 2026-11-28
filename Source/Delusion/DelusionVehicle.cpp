@@ -100,10 +100,10 @@ ADelusionVehicle::ADelusionVehicle()
     CameraBoom->bDoCollisionTest = true;
     CameraBoom->ProbeSize = 16.0f;
     CameraBoom->bEnableCameraLag = true;
-    CameraBoom->CameraLagSpeed = 8.0f;
-    CameraBoom->CameraLagMaxDistance = 80.0f;
+    CameraBoom->CameraLagSpeed = 10.0f;
+    CameraBoom->CameraLagMaxDistance = 100.0f;
     CameraBoom->bEnableCameraRotationLag = true;
-    CameraBoom->CameraRotationLagSpeed = 10.0f;
+    CameraBoom->CameraRotationLagSpeed = 12.0f;
     ChaseCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ChaseCamera"));
     ChaseCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     ChaseCamera->bUsePawnControlRotation = false;
@@ -187,6 +187,11 @@ void ADelusionVehicle::Tick(float DeltaSeconds)
         WheelVisuals[Index]->SetRelativeLocation(Rest - Wheel->GetSuspensionAxis() * Wheel->GetSuspensionOffset());
         WheelVisuals[Index]->SetRelativeRotation(FRotator(-Wheel->GetRotationAngle(), Wheel->GetSteerAngle(), 90));
     }
+
+    // Speed-sensitive camera look-ahead: shift the chase camera target forward at speed.
+    const float ForwardSpeed = Movement->GetForwardSpeed();
+    const float LookAhead = FMath::Clamp(ForwardSpeed * 0.05f, -150.0f, 250.0f);
+    CameraBoom->TargetOffset = FVector(LookAhead, 0.0f, 0.0f);
 }
 
 void ADelusionVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

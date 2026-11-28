@@ -28,12 +28,12 @@ DELUSION is an original single-player, third-person open-world action game for W
 ## Current repository state
 
 - Branch: `main`, in sync with `origin/main`.
-- Latest commit: `6b34d0e` record the sprint two milestone two vehicle animation report.
+- Latest commit: `960f62f` record the sprint two milestone three enter exit report.
 - Working tree: clean.
 
 ## Current milestone
 
-Sprint 2 Milestone 2 — Vehicle animation. Objective: integrate the existing ABP_SportsCar and CtrlRig_SportsCar into the Chaos vehicle so wheels animate correctly while driving, steering, braking and reversing. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
+Sprint 2 Milestone 3 — Enter/exit vehicle animations. Objective: replace instant-style entry/exit with sequenced, state-driven transitions using explicit states, camera blending and safe-position validation. Status: implemented, editor-tested, packaged and runtime-tested; Sprint 0 and Sprint 1 packages unchanged.
 
 ## Implemented and verified
 
@@ -68,10 +68,17 @@ Sprint 2 Milestone 2 — Vehicle animation. Objective: integrate the existing AB
 - Sprint 2 Milestone 2: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
 - Sprint 2 Milestone 2: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
 - Sprint 2 Milestone 2: profiling idle ~58.03 FPS (P99 33.78 ms, peak 728 MiB) at 1280x720 low DX11.
+- Sprint 2 Milestone 3: explicit EDelusionVehicleTransitionState enum (Idle/Entering/Exiting).
+- Sprint 2 Milestone 3: tick-driven transition completion with 0.25 s timer.
+- Sprint 2 Milestone 3: CancelTransition for interruption and vehicle destruction safety.
+- Sprint 2 Milestone 3: interaction blocked during transitions.
+- Sprint 2 Milestone 3: packaged build `Artifacts/Sprint2/Windows`, 48 files, BUILD SUCCESSFUL exit 0.
+- Sprint 2 Milestone 3: packaged tests both suites passed (Sprint0 + Sprint1.Vehicle).
+- Sprint 2 Milestone 3: profiling idle ~49.05 FPS (P99 32.42 ms, peak 721 MiB) at 1280x720 low DX11.
 
 ## Not implemented / not verified
 
-- Vehicle enter/exit animations (still procedural transform blend).
+- Vehicle enter/exit skeletal animations (still procedural transform blend; no animation assets exist).
 - Vehicle audio.
 - Camera refinement (on-foot and chase) — not yet tuned.
 - Character sprint animation (uses run animation; no dedicated sprint asset).
@@ -119,10 +126,9 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 
 ## Next actions
 
-1. Sprint 2 Milestone 3: implement enter/exit animations (procedural blend first, montages if authored).
-2. Sprint 2 Milestone 4: camera refinement (on-foot pitch, vehicle look-ahead).
-3. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
-4. Re-run packaged tests after any gameplay change.
+1. Sprint 2 Milestone 4: camera refinement (on-foot pitch limits, vehicle look-ahead, smoother follow).
+2. Sprint 2 Milestone 5: vehicle audio via MetaSounds.
+3. Re-run packaged tests after any gameplay change.
 
 ## Recent change log
 
@@ -142,3 +148,7 @@ See `SPRINT1_REPORT.md` for the full comparison table. Summary: idle ~49.70 FPS 
 - `cf192ed` — import the sports car control rig — pushed.
 - `1af6c4b` — use the sports car animation blueprint — pushed.
 - `6b34d0e` — record the sprint two milestone two vehicle animation report — pushed.
+- `fd2e1ad` — add explicit vehicle entry and exit transition states — pushed.
+- `14fa805` — implement sequenced vehicle entry and exit transitions — pushed.
+- `9765abe` — block interaction while vehicle transitions are active — pushed.
+- `960f62f` — record the sprint two milestone three enter exit report — pushed.

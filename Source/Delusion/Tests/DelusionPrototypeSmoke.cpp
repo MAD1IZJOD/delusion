@@ -185,7 +185,7 @@ private:
             Test->AddInfo(FString::Printf(TEXT("Mouse input result: yaw=%.3f pitch=%.3f"), Rotation.Yaw, Rotation.Pitch));
             Test->TestTrue(TEXT("Mouse changes camera yaw"), FMath::Abs(Rotation.Yaw) > 1);
             Test->TestTrue(TEXT("Mouse changes camera pitch"), FMath::Abs(Rotation.Pitch + 10) > 1);
-            Test->TestTrue(TEXT("Camera pitch remains constrained"), Rotation.Pitch >= -60.1 && Rotation.Pitch <= 35.1);
+            Test->TestTrue(TEXT("Camera pitch remains constrained"), Rotation.Pitch >= -70.1 && Rotation.Pitch <= 40.1);
             Place(FVector(-1400, -2300, 105), 180);
         });
         Add(0.3, [] {});

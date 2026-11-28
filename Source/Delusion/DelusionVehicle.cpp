@@ -12,6 +12,7 @@
 #include "Engine/StaticMesh.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "SynthComponents/SynthComponentToneGenerator.h"
 #include "UObject/ConstructorHelpers.h"
 
 ADelusionVehicle::ADelusionVehicle()
@@ -109,6 +110,11 @@ ADelusionVehicle::ADelusionVehicle()
     ChaseCamera->bUsePawnControlRotation = false;
     ChaseCamera->FieldOfView = 80.0f;
 
+    EngineSynth = CreateDefaultSubobject<USynthComponentToneGenerator>(TEXT("EngineSynth"));
+    EngineSynth->SetupAttachment(GetMesh());
+    EngineSynth->SetFrequency(80.0f);
+    EngineSynth->SetVolume(0.15f);
+
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Game/Materials/M_PrototypeSurface.M_PrototypeSurface"));
@@ -154,6 +160,7 @@ float ADelusionVehicle::GetSpeedKmh() const { return Seat->GetSpeedKmh(); }
 void ADelusionVehicle::BeginPlay()
 {
     Super::BeginPlay();
+    if (EngineSynth) { EngineSynth->Activate(); }
     DriverInput->ResetControls(true);
     if (SurfaceMaterial)
     {
@@ -178,7 +185,7 @@ void ADelusionVehicle::BeginPlay()
 void ADelusionVehicle::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    const UChaosWheeledVehicleMovementComponent* Movement = GetDrivingMovement();
+    UChaosWheeledVehicleMovementComponent* Movement = GetDrivingMovement();
     for (int32 Index = 0; Index < WheelVisuals.Num() && Index < Movement->Wheels.Num(); ++Index)
     {
         const UChaosVehicleWheel* Wheel = Movement->Wheels[Index];
@@ -192,6 +199,17 @@ void ADelusionVehicle::Tick(float DeltaSeconds)
     const float ForwardSpeed = Movement->GetForwardSpeed();
     const float LookAhead = FMath::Clamp(ForwardSpeed * 0.05f, -150.0f, 250.0f);
     CameraBoom->TargetOffset = FVector(LookAhead, 0.0f, 0.0f);
+
+    // Update engine audio based on vehicle state.
+    if (EngineSynth)
+    {
+        const float SpeedKmh = FMath::Abs(ForwardSpeed) * 0.036f;
+        const float Throttle = Movement->GetThrottleInput();
+        const float TargetFreq = 80.0f + SpeedKmh * 6.0f;
+        const float TargetVol = 0.08f + Throttle * 0.12f + (SpeedKmh > 1.0f ? 0.05f : 0.0f);
+        EngineSynth->SetFrequency(TargetFreq);
+        EngineSynth->SetVolume(FMath::Clamp(TargetVol, 0.05f, 0.35f));
+    }
 }
 
 void ADelusionVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

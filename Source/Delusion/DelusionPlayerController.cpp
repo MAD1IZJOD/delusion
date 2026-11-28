@@ -59,6 +59,10 @@ void ADelusionPlayerController::Interact()
     if (IsPaused()) { return; }
     if (ADelusionVehicle* ControlledVehicle = Cast<ADelusionVehicle>(GetPawn()))
     {
+        if (ControlledVehicle->GetSeat()->IsTransitioning())
+        {
+            return;
+        }
         const bool bExited = ControlledVehicle->GetSeat()->TryExit(this);
         if (HUDWidget)
         {

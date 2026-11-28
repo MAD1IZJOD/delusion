@@ -7,7 +7,7 @@ public class Delusion : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[]
         {
-            "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "ChaosVehicles", "PhysicsCore"
+            "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "ChaosVehicles", "PhysicsCore", "Synthesis"
         });
         PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore" });
     }

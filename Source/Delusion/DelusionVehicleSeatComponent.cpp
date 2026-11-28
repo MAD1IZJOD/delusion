@@ -9,6 +9,11 @@
 #include "GameFramework/PlayerController.h"
 #include "WheeledVehiclePawn.h"
 
+UDelusionVehicleSeatComponent::UDelusionVehicleSeatComponent()
+{
+    PrimaryComponentTick.bCanEverTick = true;
+}
+
 bool UDelusionVehicleSeatComponent::IsOccupied() const
 {
     return IsValid(Occupant.Get());
@@ -40,10 +45,11 @@ bool UDelusionVehicleSeatComponent::CanEnter(APawn* Interactor) const
 
 bool UDelusionVehicleSeatComponent::TryEnter(APawn* Interactor)
 {
-    if (!CanEnter(Interactor)) { return false; }
+    if (TransitionState != EDelusionVehicleTransitionState::Idle || !CanEnter(Interactor)) { return false; }
     AWheeledVehiclePawn* Vehicle = CastChecked<AWheeledVehiclePawn>(GetOwner());
     ADelusionCharacter* Pedestrian = CastChecked<ADelusionCharacter>(Interactor);
     APlayerController* Player = CastChecked<APlayerController>(Pedestrian->GetController());
+
     Occupant = Pedestrian;
     DriverController = Player;
     OnFootTransform = Pedestrian->GetActorTransform();
@@ -54,29 +60,13 @@ bool UDelusionVehicleSeatComponent::TryEnter(APawn* Interactor)
 
     const bool bAutoCamera = Player->bAutoManageActiveCameraTarget;
     Player->bAutoManageActiveCameraTarget = false;
-    Player->SetViewTargetWithBlend(Vehicle, 0.3f, VTBlend_Cubic, 0.0f, true);
+    Player->SetViewTargetWithBlend(Vehicle, TransitionDuration, VTBlend_Cubic, 0.0f, true);
     Pedestrian->GetCharacterMovement()->DisableMovement();
     Pedestrian->SetActorEnableCollision(false);
-    Pedestrian->SetActorHiddenInGame(true);
-    Pedestrian->AttachToComponent(Vehicle->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-    Pedestrian->SetActorRelativeLocation(FVector(0, -30, 70));
-    Player->Possess(Vehicle);
-    Player->bAutoManageActiveCameraTarget = bAutoCamera;
-    if (Player->GetPawn() != Vehicle)
-    {
-        Pedestrian->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        Pedestrian->SetActorTransform(OnFootTransform);
-        Pedestrian->SetActorEnableCollision(true);
-        Pedestrian->SetActorHiddenInGame(false);
-        Pedestrian->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-        Player->Possess(Pedestrian);
-        Player->SetViewTargetWithBlend(Pedestrian, 0.3f);
-        Occupant = nullptr;
-        DriverController.Reset();
-        return false;
-    }
-    Player->SetControlRotation(FRotator(-12, Vehicle->GetActorRotation().Yaw, 0));
-    UE_LOG(LogTemp, Display, TEXT("DELUSION entered vehicle; on-foot pawn preserved"));
+
+    TransitionState = EDelusionVehicleTransitionState::Entering;
+    TransitionTimer = TransitionDuration;
+    UE_LOG(LogTemp, Display, TEXT("DELUSION entering vehicle; transition started"));
     return true;
 }
 
@@ -126,10 +116,9 @@ bool UDelusionVehicleSeatComponent::FindSafeExit(FVector& OutLocation) const
 bool UDelusionVehicleSeatComponent::TryExit(APlayerController* Player)
 {
     AWheeledVehiclePawn* Vehicle = Cast<AWheeledVehiclePawn>(GetOwner());
-    FVector ExitLocation;
-    if (!IsOccupied() || !Player || DriverController.Get() != Player || !Vehicle ||
-        Player->GetPawn() != Vehicle || Player->IsPaused() ||
-        GetSpeedKmh() > MaximumExitSpeedKmh || !FindSafeExit(ExitLocation))
+    if (TransitionState != EDelusionVehicleTransitionState::Idle || !IsOccupied() || !Player ||
+        DriverController.Get() != Player || !Vehicle || Player->GetPawn() != Vehicle ||
+        Player->IsPaused() || GetSpeedKmh() > MaximumExitSpeedKmh || !FindSafeExit(ExitLocation))
     {
         return false;
     }
@@ -139,9 +128,90 @@ bool UDelusionVehicleSeatComponent::TryExit(APlayerController* Player)
     {
         Input->ResetControls(true);
     }
+
+    const bool bAutoCamera = Player->bAutoManageActiveCameraTarget;
+    Player->bAutoManageActiveCameraTarget = false;
+    Player->SetViewTargetWithBlend(Pedestrian, TransitionDuration, VTBlend_Cubic, 0.0f, true);
+    Player->bAutoManageActiveCameraTarget = bAutoCamera;
+
+    TransitionState = EDelusionVehicleTransitionState::Exiting;
+    TransitionTimer = TransitionDuration;
+    UE_LOG(LogTemp, Display, TEXT("DELUSION exiting vehicle; transition started"));
+    return true;
+}
+
+void UDelusionVehicleSeatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    if (TransitionState == EDelusionVehicleTransitionState::Idle) { return; }
+
+    TransitionTimer -= DeltaTime;
+    if (TransitionTimer > 0.0f) { return; }
+
+    if (TransitionState == EDelusionVehicleTransitionState::Entering)
+    {
+        CompleteEntry();
+    }
+    else if (TransitionState == EDelusionVehicleTransitionState::Exiting)
+    {
+        CompleteExit();
+    }
+}
+
+void UDelusionVehicleSeatComponent::CompleteEntry()
+{
+    AWheeledVehiclePawn* Vehicle = Cast<AWheeledVehiclePawn>(GetOwner());
+    ADelusionCharacter* Pedestrian = Occupant.Get();
+    APlayerController* Player = DriverController.Get();
+    if (!Vehicle || !Pedestrian || !Player || Player->GetPawn() != Pedestrian->GetController()->GetPawn())
+    {
+        // Already possessed the vehicle or invalid state; just ensure consistency.
+    }
+
+    if (Vehicle && Pedestrian && Player)
+    {
+        Pedestrian->SetActorHiddenInGame(true);
+        Pedestrian->AttachToComponent(Vehicle->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        Pedestrian->SetActorRelativeLocation(FVector(0, -30, 70));
+        Player->Possess(Vehicle);
+        if (Player->GetPawn() == Vehicle)
+        {
+            Pedestrian->SetActorEnableCollision(false);
+            Player->SetControlRotation(FRotator(-12, Vehicle->GetActorRotation().Yaw, 0));
+            TransitionState = EDelusionVehicleTransitionState::Idle;
+            UE_LOG(LogTemp, Display, TEXT("DELUSION entered vehicle; on-foot pawn preserved"));
+            return;
+        }
+        // Possession failed; revert.
+        Pedestrian->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        Pedestrian->SetActorTransform(OnFootTransform);
+        Pedestrian->SetActorEnableCollision(true);
+        Pedestrian->SetActorHiddenInGame(false);
+        Pedestrian->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+        Player->Possess(Pedestrian);
+        Player->SetViewTargetWithBlend(Pedestrian, 0.3f);
+        Occupant = nullptr;
+        DriverController.Reset();
+    }
+    TransitionState = EDelusionVehicleTransitionState::Idle;
+}
+
+void UDelusionVehicleSeatComponent::CompleteExit()
+{
+    AWheeledVehiclePawn* Vehicle = Cast<AWheeledVehiclePawn>(GetOwner());
+    ADelusionCharacter* Pedestrian = Occupant.Get();
+    APlayerController* Player = DriverController.Get();
+    if (!Vehicle || !Pedestrian || !Player || Player->GetPawn() != Vehicle)
+    {
+        TransitionState = EDelusionVehicleTransitionState::Idle;
+        return;
+    }
+
     Pedestrian->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
     Pedestrian->SetActorLocationAndRotation(ExitLocation, FRotator(0, Vehicle->GetActorRotation().Yaw, 0),
         false, nullptr, ETeleportType::TeleportPhysics);
+
     const bool bAutoCamera = Player->bAutoManageActiveCameraTarget;
     Player->bAutoManageActiveCameraTarget = false;
     Player->Possess(Pedestrian);
@@ -151,7 +221,8 @@ bool UDelusionVehicleSeatComponent::TryExit(APlayerController* Player)
         Pedestrian->AttachToComponent(Vehicle->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
         Pedestrian->SetActorRelativeLocation(FVector(0, -30, 70));
         Player->Possess(Vehicle);
-        return false;
+        TransitionState = EDelusionVehicleTransitionState::Idle;
+        return;
     }
     Pedestrian->SetActorHiddenInGame(false);
     Pedestrian->SetActorEnableCollision(true);
@@ -160,12 +231,58 @@ bool UDelusionVehicleSeatComponent::TryExit(APlayerController* Player)
     Player->SetViewTargetWithBlend(Pedestrian, 0.3f, VTBlend_Cubic, 0.0f, true);
     Occupant = nullptr;
     DriverController.Reset();
+    TransitionState = EDelusionVehicleTransitionState::Idle;
     UE_LOG(LogTemp, Display, TEXT("DELUSION exited vehicle at %s"), *ExitLocation.ToCompactString());
-    return true;
+}
+
+void UDelusionVehicleSeatComponent::CancelTransition()
+{
+    if (TransitionState == EDelusionVehicleTransitionState::Entering)
+    {
+        // Restore the character if entry was interrupted.
+        if (IsValid(Occupant.Get()) && DriverController.IsValid())
+        {
+            ADelusionCharacter* Pedestrian = Occupant.Get();
+            APlayerController* Player = DriverController.Get();
+            Pedestrian->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+            Pedestrian->SetActorTransform(OnFootTransform);
+            Pedestrian->SetActorEnableCollision(true);
+            Pedestrian->SetActorHiddenInGame(false);
+            Pedestrian->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+            Player->Possess(Pedestrian);
+            Player->SetViewTargetWithBlend(Pedestrian, 0.3f);
+        }
+        Occupant = nullptr;
+        DriverController.Reset();
+    }
+    else if (TransitionState == EDelusionVehicleTransitionState::Exiting)
+    {
+        // Restore vehicle control if exit was interrupted.
+        if (IsValid(Occupant.Get()) && DriverController.IsValid())
+        {
+            ADelusionCharacter* Pedestrian = Occupant.Get();
+            APlayerController* Player = DriverController.Get();
+            AWheeledVehiclePawn* Vehicle = Cast<AWheeledVehiclePawn>(GetOwner());
+            if (Vehicle)
+            {
+                Pedestrian->AttachToComponent(Vehicle->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                Pedestrian->SetActorRelativeLocation(FVector(0, -30, 70));
+                Pedestrian->SetActorHiddenInGame(true);
+                Pedestrian->SetActorEnableCollision(false);
+                Player->Possess(Vehicle);
+            }
+        }
+    }
+    TransitionState = EDelusionVehicleTransitionState::Idle;
+    TransitionTimer = 0.0f;
 }
 
 void UDelusionVehicleSeatComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    if (EndPlayReason == EEndPlayReason::Destroyed && IsTransitioning())
+    {
+        CancelTransition();
+    }
     // Ordinary exits always use the checks above. Owner removal is not vehicle destruction gameplay.
     if (EndPlayReason == EEndPlayReason::Destroyed && IsOccupied() && DriverController.IsValid())
     {

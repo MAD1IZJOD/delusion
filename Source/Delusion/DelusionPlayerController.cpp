@@ -26,8 +26,8 @@ void ADelusionPlayerController::BeginPlay()
     if (!IsLocalController()) { return; }
     if (PlayerCameraManager)
     {
-        PlayerCameraManager->ViewPitchMin = -60.0f;
-        PlayerCameraManager->ViewPitchMax = 35.0f;
+        PlayerCameraManager->ViewPitchMin = -70.0f;
+        PlayerCameraManager->ViewPitchMax = 40.0f;
     }
     HUDWidget = CreateWidget<UDelusionHUDWidget>(this, UDelusionHUDWidget::StaticClass());
     if (HUDWidget) { HUDWidget->AddToViewport(); }
